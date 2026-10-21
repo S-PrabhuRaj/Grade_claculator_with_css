@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grade Calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="calculator">
+    <div class="eyebrow">STUDENT TOOL</div>
+    <h1>Grade Calculator</h1>
+    <p class="subtitle">Enter your marks to calculate your total, percentage, and grade.</p>
+
+    <form id="gradeForm">
+      <div class="fields">
+        <label>
+          Subject 1
+          <input type="number" id="mark1" min="0" max="100" step="0.1" placeholder="0–100" required>
+        </label>
+        <label>
+          Subject 2
+          <input type="number" id="mark2" min="0" max="100" step="0.1" placeholder="0–100" required>
+        </label>
+        <label>
+          Subject 3
+          <input type="number" id="mark3" min="0" max="100" step="0.1" placeholder="0–100" required>
+        </label>
+        <label>
+          Subject 4
+          <input type="number" id="mark4" min="0" max="100" step="0.1" placeholder="0–100" required>
+        </label>
+        <label>
+          Subject 5
+          <input type="number" id="mark5" min="0" max="100" step="0.1" placeholder="0–100" required>
+        </label>
+      </div>
+
+      <p class="hint">Each subject is marked out of 100.</p>
+      <button type="submit">Calculate Grade <span aria-hidden="true">→</span></button>
+      <button type="button" class="reset-button" id="resetButton">Reset marks</button>
+      <p id="errorMessage" class="error" role="alert"></p>
+    </form>
+
+    <section class="results" id="results" aria-live="polite" hidden>
+      <div class="result-heading">YOUR RESULT</div>
+      <div class="grade-row">
+        <div>
+          <p class="result-label">Your grade</p>
+          <div id="grade" class="grade-letter">A</div>
+        </div>
+        <div class="percentage-box">
+          <p class="result-label">Percentage</p>
+          <div><span id="percentage">0</span><span class="percent-sign">%</span></div>
+        </div>
+      </div>
+      <div class="stats">
+        <div><span>Total marks</span><strong id="total">0 / 500</strong></div>
+        <div><span>Average marks</span><strong id="average">0 / 100</strong></div>
+        <div><span>Status</span><strong id="status">Pass</strong></div>
+      </div>
+      <p class="grade-note">Grade scale: A+ (90–100), A (80–89), B (70–79), C (60–69), D (50–59), F (below 50).</p>
+    </section>
+    <footer>Keep learning. Keep improving.</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('gradeForm');
+    const results = document.getElementById('results');
+    const errorMessage = document.getElementById('errorMessage');
+    const resetButton = document.getElementById('resetButton');
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      errorMessage.textContent = '';
+
+      const marks = [1, 2, 3, 4, 5].map(n => Number(document.getElementById('mark' + n).value));
+      const inputs = [1, 2, 3, 4, 5].map(n => document.getElementById('mark' + n));
+
+      if (inputs.some(input => input.value.trim() === '') || marks.some(mark => !Number.isFinite(mark) || mark < 0 || mark > 100)) {
+        errorMessage.textContent = 'Please enter a mark from 0 to 100 for every subject.';
+        results.hidden = true;
+        return;
+      }
+
+      const total = marks.reduce((sum, mark) => sum + mark, 0);
+      const average = total / marks.length;
+      let grade = 'F';
+      if (average >= 90) grade = 'A+';
+      else if (average >= 80) grade = 'A';
+      else if (average >= 70) grade = 'B';
+      else if (average >= 60) grade = 'C';
+      else if (average >= 50) grade = 'D';
+
+      document.getElementById('grade').textContent = grade;
+      document.getElementById('percentage').textContent = average.toFixed(1);
+      document.getElementById('total').textContent = total.toFixed(1).replace('.0', '') + ' / 500';
+      document.getElementById('average').textContent = average.toFixed(1) + ' / 100';
+      document.getElementById('status').textContent = average >= 50 ? 'Pass' : 'Fail';
+      document.getElementById('status').className = average >= 50 ? 'pass' : 'fail';
+      results.hidden = false;
+      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    resetButton.addEventListener('click', function () {
+      form.reset();
+      results.hidden = true;
+      errorMessage.textContent = '';
+      document.getElementById('status').className = '';
+    });
+  </script>
+</body>
+</html>
