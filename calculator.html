@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grade Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px #2223;
+    }
+
+    h1 {
+      text-align: center;
+      color: #5b55ce;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0ef;
+      border-radius: 10px;
+      outline: none;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: #7065df;
+      box-shadow: 0 0 0 3px #7065df20;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 13px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px #667eea55;
+    }
+
+    .result {
+      display: none;
+      margin-top: 22px;
+      padding: 20px;
+      text-align: center;
+      background: #f3f1ff;
+      border-radius: 14px;
+    }
+
+    .result h2 {
+      color: #5b55ce;
+      font-size: 30px;
+      margin: 8px;
+    }
+
+    .result p {
+      margin: 8px;
+      color: #444;
+    }
+
+    #message {
+      font-weight: bold;
+      color: #5b55ce;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 Grade Calculator</h1>
+    <p class="subtitle">Calculate your marks and grade</p>
+
+    <label for="subjects">Number of subjects</label>
+    <input type="number" id="subjects"
+           min="1" max="30" value="5">
+
+    <label for="maximum">Maximum marks per subject</label>
+    <input type="number" id="maximum" min="1" value="100">
+
+    <div id="marksInputs"></div>
+
+    <button type="button" onclick="calculateGrade()">
+      Calculate Grade
+    </button>
+
+    <div class="result" id="result" aria-live="polite">
+      <p>Total Marks</p>
+      <h2 id="total">0 / 500</h2>
+      <p>Percentage: <strong id="percentage">0%</strong></p>
+      <p>Grade: <strong id="grade">-</strong></p>
+      <p id="message"></p>
+    </div>
+  </div>
+
+  <script>
+    const subjects = document.getElementById("subjects");
+    const marksInputs = document.getElementById("marksInputs");
+
+    function createInputs() {
+      const count = Number(subjects.value);
+
+      if (!Number.isInteger(count) || count < 1 || count > 30) {
+        marksInputs.innerHTML =
+          "<p>Please enter 1 to 30 subjects.</p>";
+        return;
+      }
+
+      marksInputs.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        marksInputs.innerHTML += `
+          <label for="mark${i}">Subject ${i} Marks</label>
+          <input type="number" id="mark${i}"
+                 min="0" placeholder="Enter marks"
+                 required>
+        `;
+      }
+    }
+
+    subjects.addEventListener("input", createInputs);
+    createInputs();
+
+    function calculateGrade() {
+      const count = Number(subjects.value);
+      const maximum = Number(document.getElementById("maximum").value);
+      const result = document.getElementById("result");
+
+      if (!Number.isInteger(count) || count < 1 ||
+          count > 30 || !Number.isFinite(maximum) ||
+          maximum <= 0) {
+        alert("Enter valid subjects and maximum marks.");
+        return;
+      }
+
+      let total = 0;
+
+      for (let i = 1; i <= count; i++) {
+        const field = document.getElementById("mark" + i);
+        const value = field.value.trim() === ""
+          ? NaN : Number(field.value);
+
+        if (!Number.isFinite(value) ||
+            value < 0 || value > maximum) {
+          alert(`Enter valid marks for Subject ${i} (0-${maximum}).`);
+          field.focus();
+          return;
+        }
+
+        total += value;
+      }
+
+      const percentage = (total / (count * maximum)) * 100;
+      let grade, message;
+
+      if (percentage >= 90) {
+        grade = "A+";
+        message = "Outstanding!";
+      } else if (percentage >= 80) {
+        grade = "A";
+        message = "Excellent work!";
+      } else if (percentage >= 70) {
+        grade = "B";
+        message = "Very good!";
+      } else if (percentage >= 60) {
+        grade = "C";
+        message = "Good job!";
+      } else if (percentage >= 50) {
+        grade = "D";
+        message = "Keep practising!";
+      } else if (percentage >= 35) {
+        grade = "E";
+        message = "Pass";
+      } else {
+        grade = "F";
+        message = "Needs improvement.";
+      }
+
+      document.getElementById("total").textContent =
+        `${total} / ${count * maximum}`;
+      document.getElementById("percentage").textContent =
+        percentage.toFixed(2) + "%";
+      document.getElementById("grade").textContent = grade;
+      document.getElementById("message").textContent = message;
+
+      result.style.display = "block";
+    }
+  </script>
+</body>
+</html>
